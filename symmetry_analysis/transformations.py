@@ -20,8 +20,8 @@ def triangle_vector(mol:Atoms, idx:list):
     By default, takes the first three atoms in the molecule.
     """
     # Define two non-parallel vectors in the molecule
-    v1 = mol.get_distance(idx[0], idx[1], mic=True, vector=True)
-    v2 = mol.get_distance(idx[0], idx[2], mic=True, vector=True)
+    v1 = mol.get_distance(idx[0], idx[1], mic=False, vector=True)
+    v2 = mol.get_distance(idx[0], idx[2], mic=False, vector=True)
 
     # Define vector normal to v1 and v2
     vector = np.cross(v1, v2)
