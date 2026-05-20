@@ -5,7 +5,7 @@ This repository holds the code used for symmetry analysis in the Bayesian Optimi
 To install this package, you can follow the following steps:
 
  1. Clone this repository to your machine.
- 2. Activate your BOSS python virtual environment ([BOSS installation](https://sites.utu.fi/boss/)).
+ 2. Activate your BOSS python virtual environment ([BOSS installation](https://cest-group.gitlab.io/boss/installation.html)).
  3. Navigate to the cloned folder. 
  4. Execute the following lines: 
 
