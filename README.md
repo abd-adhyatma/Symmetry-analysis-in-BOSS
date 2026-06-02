@@ -13,4 +13,6 @@ To install this package, you can follow the following steps:
 
 ```pip install .```
 
+Remember to start small!
+
 > Written with [StackEdit](https://stackedit.io/).
