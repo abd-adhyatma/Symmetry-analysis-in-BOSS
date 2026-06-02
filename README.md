@@ -1,5 +1,6 @@
 # Symmetry analysis in the BOSS framework
-This is the repository for the code used for symmetry analysis in the Bayesian Optimization Structure Search (BOSS) framework.
+This is the repository for the symmetry analysis algorithm in the Bayesian Optimization Structure Search (BOSS) framework.
+Currently, the algorithm is tailored for molecular adsorption structure search.
 The code exploits substrate and adsorbate symmetries to augment each sampling iteration of the structure search process.
 The codes are contained in a python package.
 A manuscript that describes the design and implementation of this algorithm is currently in preparation.
