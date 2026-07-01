@@ -9,7 +9,6 @@ def get_symmetric_positions(
     output_filename: str = 'position_symmetry_log.txt', tolerance:float = 1e-3):
     """
     Get unique equivalent positions in x, y, z based on the symmetries of a slab.
-    Ensures unique positions and that the z-coordinates match the original position's z within tolerance.
     Additionally logs symmetry operations to a file, including the determinant of each rotation.
 
     Parameters:
@@ -17,7 +16,7 @@ def get_symmetric_positions(
     slab (ase.Atoms object): slab system isolated from the adsorbed molecule.
     n_cell (int): number of slab supercells, sets symmetric positions to look for and bounds for solutions.
     output_filename (str): name of the file to write the symmetry operations and results.
-    tolerance: tolerance for similarity in z position (in scaled coordinates).
+    tolerance: tolerance for similarity between proposed solutions.
 
     Returns:
     new_positions (list): list of unique positions along with their corresponding (rotation, translation) transformations.
@@ -93,7 +92,7 @@ def get_symmetric_positions_and_angles(
     tolerance: tolerance for similarity in z position (in scaled coordinates).
 
     Returns:
-    new_positions_and_angles (list): list of unique pairs of (position[0], angles[1], transformations[2]) that respect z-coordinate condition.
+    
     """
     if len(x_bounds) != 2 or len(y_bounds) != 2:
         raise ValueError("Bounds for x or y must be specified as a list, i.e. [lowerbound, upperbound]")
@@ -147,19 +146,23 @@ def get_symmetric_positions_and_angles(
             new_pos = new_pos % 1.0
             new_pos_boss = symm_to_boss(new_pos, slab)
 
-            # if not (lb <= new_pos_boss[0] <= ub) or not (lb <= new_pos_boss[1] <= ub): CONDITION FOR X AND Y TO BE BETWEEN BOUNDS
+            out_of_bounds = False
             if not (x_bounds[0] <= new_pos_boss[0] <= x_bounds[1]) or not (y_bounds[0] <= new_pos_boss[1] <= y_bounds[1]):
-                uid = f"W{rot_idx}_w{trans_idx}_R0_O0"
-                out_of_bounds_points.append(
-                    (
-                        np.array(new_pos_boss),
-                        np.array([]), # Empty array because O' not yet processed
-                        (rotation, translation),
-                        uid
-                    )
-                )
-                file.write(f"{i+1} | Fail | Out-of-bounds | {symm_to_boss(new_pos, slab)} | N/A | {determinant:.3f} | {rot_idx} | {trans_idx} | N/A | N/A | N/A\n")
-                continue
+                out_of_bounds = True
+
+            # # if not (lb <= new_pos_boss[0] <= ub) or not (lb <= new_pos_boss[1] <= ub): CONDITION FOR X AND Y TO BE BETWEEN BOUNDS
+            # if not (x_bounds[0] <= new_pos_boss[0] <= x_bounds[1]) or not (y_bounds[0] <= new_pos_boss[1] <= y_bounds[1]):
+            #     uid = f"W{rot_idx}_w{trans_idx}_R0_O0"
+            #     out_of_bounds_points.append(
+            #         (
+            #             np.array(new_pos_boss),
+            #             np.array([]), # Empty array because O' not yet processed
+            #             (rotation, translation),
+            #             uid
+            #         )
+            #     )
+            #     file.write(f"{i+1} | Fail | Out-of-bounds | {symm_to_boss(new_pos, slab)} | N/A | {determinant:.3f} | {rot_idx} | {trans_idx} | N/A | N/A | N/A\n")
+            #     continue
             
             for (mol_symmetry, symm_idx) in zip(mol_symmetries, mol_symm_idx):
                 rotation_trans = rotation_from_transformed(mol=mol, slab=slab, orientation=angles, rotation=rotation, translation=translation, idx=idx)
@@ -168,13 +171,25 @@ def get_symmetric_positions_and_angles(
 
                 for j, new_orientation in enumerate(new_orientations):
                     uid = f"{i+1}_W{rot_idx}_w{trans_idx}_R{symm_idx}_O{j+1}"
+                    if out_of_bounds:
+                        out_of_bounds_points.append(
+                            (
+                                np.array(new_pos_boss), 
+                                np.array(new_orientation),
+                                (rotation, translation),
+                                uid
+                            )
+                        )
+                        file.write(f"{i+1} | Fail | Out-of-bounds | {new_pos_boss} | {new_orientation} | {determinant:.3f} | {rot_idx} | {trans_idx} | {symm_idx} | {j+1} | {uid}\n")                    
+                        continue
+                        
                     pair_is_unique = True
                     for existing_pos, existing_angle, _, _ in unique_positions_and_angles:
                         if (np.allclose(new_pos_boss, existing_pos, atol=tolerance) and
                             np.allclose(new_orientation, existing_angle, atol=tolerance)):
                             pair_is_unique = False
                             break
-                    
+
                     if pair_is_unique:
                         unique_positions_and_angles.append(
                             (
@@ -185,6 +200,7 @@ def get_symmetric_positions_and_angles(
                             )
                         )
                         file.write(f"{i+1} | Pass | None | {new_pos_boss} | {new_orientation} | {determinant:.3f} | {rot_idx} | {trans_idx} | {symm_idx} | {j+1} | {uid}\n")
+                    
                     else:
                         duplicate_positions_and_angles.append(
                             (
