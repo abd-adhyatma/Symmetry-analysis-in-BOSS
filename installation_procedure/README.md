@@ -5,6 +5,6 @@ SOFI is an algorithm to extract molecule symmetry operations automatically, anal
 2. Activate the environment.
 3. Install SOFI using conda with `conda install ira -c conda-forge`.
 4. Install BOSS using `pip`.
-4. Install the required packages using `requirements.txt`
 5. Navigate to the root directory of the symmetry analysis algorithm.
-6. Install the algorithm using `pip install .`
+6. Install the required packages using `requirements.txt`
+7. Install the algorithm using `pip install .`
