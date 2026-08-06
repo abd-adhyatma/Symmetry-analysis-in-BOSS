@@ -37,16 +37,21 @@ def get_symmetric_positions_and_angles_with_SOFI(
     tolerance: tolerance for similarity in z position (in scaled coordinates).
 
     Returns:
-    
+    unique, duplicate, out_of_bounds: lists of unique, duplicate, and out-of-bounds adsorption configurations.
     """
     if len(x_bounds) != 2 or len(y_bounds) != 2:
         raise ValueError("Bounds for x or y must be specified as a list, i.e. [lowerbound, upperbound]")
+        
     # if mol_symmetries is None:
     #     mol_symmetries = [np.eye(3)]
+    
     if idx is None:
         idx = [0, 1, 2]
     if len(angles) != 3:
         raise ValueError("Angles must have exactly three elements (alpha, beta, gamma).")
+
+    slab = slab.copy()
+    mol = mol.copy()
     
     cell = get_spglib_cell(slab)
     symmetry = filter_z(get_symmetry(cell, 1e-5))
@@ -59,13 +64,16 @@ def get_symmetric_positions_and_angles_with_SOFI(
     R_init = euler_to_rotation(angles[0], angles[1], angles[2], return_Rs=False)
 
     # crude integration of SOFI
-    mol_path = write('mol.xyz', mol)
+    sofi = ira_mod.SOFI()
+    write('mol.xyz', mol)
+    mol_path = 'mol.xyz'
     nat, typ, coords = read_xyz(mol_path)
     gc = np.mean( coords, axis=0 )
     coords = coords - gc
     sym_thr = 0.05
-    sym = sofi.compute( nat, typ, coords, sym_thr )
-    symm_list = sym.matrix
+
+    n_mat, mat_list = sofi.get_symm_ops(nat, typ, coords, sym_thr)
+    symm_list = mat_list
     mol_symmetries = [x for x in symm_list if np.linalg.det(x)>0]
 
     if os.path.exists("mol.xyz"):
