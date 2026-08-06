@@ -92,7 +92,7 @@ def get_symmetric_positions_and_angles(
     tolerance: tolerance for similarity in z position (in scaled coordinates).
 
     Returns:
-    
+    unique, duplicate, out_of_bounds: lists of unique, duplicate, and out-of-bounds adsorption configurations.
     """
     if len(x_bounds) != 2 or len(y_bounds) != 2:
         raise ValueError("Bounds for x or y must be specified as a list, i.e. [lowerbound, upperbound]")
@@ -102,6 +102,9 @@ def get_symmetric_positions_and_angles(
         idx = [0, 1, 2]
     if len(angles) != 3:
         raise ValueError("Angles must have exactly three elements (alpha, beta, gamma).")
+
+    slab = slab.copy()
+    mol = mol.copy()
     
     cell = get_spglib_cell(slab)
     symmetry = filter_z(get_symmetry(cell, 1e-5))
