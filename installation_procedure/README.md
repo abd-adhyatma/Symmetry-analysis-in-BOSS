@@ -7,4 +7,4 @@ SOFI is a recently published algorithm to extract molecule symmetry operations a
 4. Install BOSS using `pip`.
 5. Navigate to the root directory of the symmetry analysis algorithm.
 6. Install the required packages in `requirements.txt`.
-7. Install the algorithm using the `pip install .` command-.
+7. Install the algorithm using the `pip install .` command.
