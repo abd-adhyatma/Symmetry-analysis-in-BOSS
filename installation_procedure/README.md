@@ -1,7 +1,7 @@
 # Conda installation for SOFI compatibilty
 As of 13/07/2026, the following steps are recommended for setting up a conda environment that is compatible with [SOFI](https://mammasmias.github.io/IterativeRotationsAssignments/index.html).
 SOFI is a recently published algorithm to extract molecule symmetry operations automatically, analogous to `spglib` for extracting substrate symmetry.
-1. Use `conda` to create an environment with `python=3.11` and `pip`.
+1. Use `conda` to create an environment with `python=3.12` and `pip`.
 2. Activate the environment.
 3. Install SOFI using conda with `conda install ira -c conda-forge`.
 4. Install BOSS using `pip`.
