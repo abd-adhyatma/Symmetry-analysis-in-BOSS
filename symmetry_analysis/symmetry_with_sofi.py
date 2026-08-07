@@ -7,14 +7,21 @@ from .utility import *
 from .transformations import *
 import ira_mod
 
-def read_xyz(fname):
-  import numpy as np
-  typ = np.genfromtxt( fname, skip_header=2, usecols=[0], dtype=None, encoding=None )
-  coords = np.genfromtxt( fname, skip_header = 2, usecols = [1,2,3], dtype=np.float64 )
-  nat = len( typ )
-  cc=np.ndarray( (nat,3), dtype=np.float64, order="C" )
-  cc=coords
-  return nat, typ, cc
+def mol_to_symm(mol:Atoms):
+    nat = len(mol)
+    typ = np.array([s for s in mol.get_atomic_numbers()])
+    coords = np.array([p for p in mol.get_positions()])
+    
+    sofi = ira_mod.SOFI()
+    sym_thr = 0.05
+    
+    n_mat, mat_list = sofi.get_symm_ops(nat, typ, coords, sym_thr)
+    rot_list = [x for x in mat_list if np.linalg.det(x)>0]
+
+    # sym = sofi.compute(nat, typ, coords, sym_thr)
+    # mat_list = sym.matrix
+    # rot_list = [x for x in mat_list if np.linalg.det(x)>0]
+    return rot_list
 
 def get_symmetric_positions_and_angles_with_SOFI(
     pos: list, angles: list, slab: Atoms, mol: Atoms, idx=None, 
@@ -63,21 +70,8 @@ def get_symmetric_positions_and_angles_with_SOFI(
     translations = symmetry['translations']
     R_init = euler_to_rotation(angles[0], angles[1], angles[2], return_Rs=False)
 
-    # crude integration of SOFI
-    sofi = ira_mod.SOFI()
-    write('mol.xyz', mol)
-    mol_path = 'mol.xyz'
-    nat, typ, coords = read_xyz(mol_path)
-    gc = np.mean( coords, axis=0 )
-    coords = coords - gc
-    sym_thr = 0.05
-
-    n_mat, mat_list = sofi.get_symm_ops(nat, typ, coords, sym_thr)
-    symm_list = mat_list
-    mol_symmetries = [x for x in symm_list if np.linalg.det(x)>0]
-
-    if os.path.exists("mol.xyz"):
-        os.remove("mol.xyz")
+    # integration of SOFI
+    mol_symmetries = mol_to_symm(mol)
     
     unique_positions_and_angles = []
     duplicate_positions_and_angles = []
